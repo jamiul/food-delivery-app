@@ -1,0 +1,79 @@
+services:
+  site:
+    build:
+      context: .
+      dockerfile: dockerfiles/nginx.dockerfile
+    container_name: "site"
+    ports:
+      - 80:80
+    volumes:
+      - ../src:/var/www/html
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - php
+
+  mysql:
+    image: mysql:8.0
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: "database"
+    tty: true
+    ports:
+      - 3306:3306
+    restart: "on-failure"
+    env_file:
+      - ./env/mysql.env
+    networks:
+      - backend
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:latest
+    container_name: "phpmyadmin"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: admin
+      PMA_PASSWORD: admin123
+    networks:
+      - backend
+    ports:
+      - "8080:80"
+
+  php:
+    build:
+      context: .
+      dockerfile: dockerfiles/php.dockerfile
+      args:
+        - UID=${UID:-1000}
+        - GID=${GID:-1000}
+    container_name: "php"
+    ports:
+      - 9000:9000
+    volumes:
+      - ../src:/var/www/html:delegated
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      - mysql
+      - phpmyadmin
+
+
+volumes:
+  mysql_data:
+#
+# Network Definition
+#
+
+networks:
+  frontend:
+    name: nw_frontend
+    driver: bridge
+  backend:
+    name: nw_backend
+    driver: bridge

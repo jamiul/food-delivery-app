@@ -1,0 +1,9 @@
+
+Todo:
+  - Need to expose two REST APIs.
+  - 1st API: time series data of a rider location (preferaby with rider_id, service_name, lat, long, capture_time).
+  - 2nd API: service owner know currenty which rider is nearby to a specific resturant.
+
+  Food delivery mobile app you have to design a service that will expose two REST apis.
+  - First will take input (rider_id,lat, long, timestamp, etc) from the app and store the relevant data.
+  - The 2nd api will take input the restaurant_id of the restaurant and calculate the nearest rider or at least two who was the nearest in the last 5 minutes. you can calculate the distance between the two lat-long poing
